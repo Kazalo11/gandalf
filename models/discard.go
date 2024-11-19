@@ -11,7 +11,7 @@ func (d *Discard) IsEmpty() bool {
 }
 
 func (d *Discard) DrawFromDiscard() Card {
-	card := (*d)[0]
-	(*d) = (*d)[1:]
+	card := (*d)[len(*d)-1]
+	(*d) = (*d)[:len(*d)-1]
 	return card
 }

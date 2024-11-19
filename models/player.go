@@ -31,3 +31,9 @@ func (p *Player) CalculateScore() int {
 func (p *Player) Look(cardNum int) (string, string) {
 	return p.Hand[cardNum].Show()
 }
+
+func (p *Player) PlayCard(cardNum int, d *Discard) {
+	card := p.Hand[cardNum]
+	p.Hand = append(p.Hand[:cardNum], p.Hand[cardNum+1:]...)
+	(*d).AddCard(card)
+}

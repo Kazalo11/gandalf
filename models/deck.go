@@ -23,8 +23,8 @@ func InitDeck() Deck {
 }
 
 func (d *Deck) DrawFromDeck() Card {
-	card := (*d)[0]
-	(*d) = (*d)[1:]
+	card := (*d)[len(*d)-1]
+	(*d) = (*d)[:len(*d)-1]
 	return card
 
 }
