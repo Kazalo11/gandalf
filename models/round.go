@@ -14,5 +14,9 @@ func (r *Round) NextTurn() {
 }
 
 func (r *Round) SkipTurn() {
-	(*r).Turn -= 2
+	if r.Turn < 2 {
+		(*r).Turn = 0
+	} else {
+		(*r).Turn -= 2
+	}
 }
