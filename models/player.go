@@ -9,12 +9,12 @@ type Player struct {
 
 func (p *Player) DrawCards(d *Deck, numberOfCards int) {
 	for i := 0; i < numberOfCards; i++ {
-		p.Hand = append(p.Hand, (*d).Draw())
+		p.Hand = append(p.Hand, (*d).DrawFromDeck())
 
 	}
 	fmt.Printf("Cards drawn: %v \n", p.Hand)
 }
 
 func (p *Player) Draw(d *Deck) Card {
-	return (*d).Draw()
+	return (*d).DrawFromDeck()
 }

@@ -22,7 +22,7 @@ func InitDeck() Deck {
 	return deck
 }
 
-func (d *Deck) Draw() Card {
+func (d *Deck) DrawFromDeck() Card {
 	card := (*d)[0]
 	(*d) = (*d)[1:]
 	return card
