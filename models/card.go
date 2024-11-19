@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 const (
 	SPADE = iota
 	CLUB
@@ -61,17 +63,32 @@ func (c Card) Value() int {
 	}
 }
 
-func (c Card) toSuit() string {
+func (c Card) Show() (string, string) {
+	var rank, suit string
+
+	switch c.Rank {
+	case 11:
+		rank = "J"
+	case 12:
+		rank = "Q"
+	case 13:
+		rank = "K"
+	case 1:
+		rank = "A"
+	default:
+		rank = fmt.Sprint(c.Rank)
+	}
 	switch c.Suit {
 	case SPADE:
-		return "♠"
+		suit = "♠"
 	case HEART:
-		return "♥"
+		suit = "♥"
 	case CLUB:
-		return "♣"
+		suit = "♣"
 	case DIAMOND:
-		return "♦"
+		suit = "♦"
 	default:
-		return ""
 	}
+
+	return rank, suit
 }
