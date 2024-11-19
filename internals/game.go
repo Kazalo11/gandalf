@@ -1,6 +1,11 @@
 package internals
 
-import "github.com/Kazalo11/gandalf/models"
+import (
+	"errors"
+
+	"github.com/Kazalo11/gandalf/models"
+	"github.com/google/uuid"
+)
 
 type Game struct {
 	Deck    models.Deck
@@ -19,5 +24,15 @@ func InitGame(numOfPlayers int) Game {
 		g.Players = append(g.Players, player)
 	}
 	return g
+
+}
+
+func (g *Game) getPlayer(id uuid.UUID) (models.Player, error) {
+	for _, player := range g.Players {
+		if id == player.Id {
+			return player, nil
+		}
+	}
+	return models.Player{}, errors.New("couldn't find that player in the game")
 
 }
