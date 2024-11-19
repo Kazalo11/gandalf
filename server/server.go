@@ -11,15 +11,17 @@ import (
 )
 
 func Start() error {
-	l, err := net.Listen("tcp", "0")
+	l, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
+		log.Printf("Error found: %v \n", err)
 		return err
 	}
+	log.Printf("Listening on ws://%v", l.Addr().String())
+
+	m := initMessageServer()
 
 	s := &http.Server{
-		Handler: messageServer{
-			logf: log.Printf,
-		},
+		Handler:      m,
 		ReadTimeout:  time.Second * 10,
 		WriteTimeout: time.Second * 10,
 	}

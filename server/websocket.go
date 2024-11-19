@@ -2,9 +2,9 @@ package server
 
 import (
 	"context"
-	"fmt"
-	"io"
+	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/coder/websocket"
@@ -12,61 +12,38 @@ import (
 )
 
 type messageServer struct {
-	logf func(f string, v ...interface{})
+	logf                    func(f string, v ...interface{})
+	subscriberMessageBuffer int
+	publishLimiter          *rate.Limiter
+	subscribers             map[*subscriber]struct{}
+	serveMux                http.ServeMux
+	subscribersMu           sync.Mutex
+}
+type subscriber struct {
+	msgs      chan []byte
+	closeSlow func()
 }
 
-func (s messageServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	c, err := websocket.Accept(w, r, &websocket.AcceptOptions{
-		Subprotocols: []string{"message"},
-	})
-	if err != nil {
-		s.logf("%v", err)
-		return
+func initMessageServer() *messageServer {
+	ms := &messageServer{
+		subscriberMessageBuffer: 16,
+		logf:                    log.Printf,
+		subscribers:             make(map[*subscriber]struct{}),
+		publishLimiter:          rate.NewLimiter(rate.Every(time.Millisecond*100), 8),
 	}
-	defer c.CloseNow()
 
-	if c.Subprotocol() != "message" {
-		c.Close(websocket.StatusPolicyViolation, "client must speak the message subprotocol")
-		return
-	}
-	l := rate.NewLimiter(rate.Every(time.Millisecond*100), 10)
-	for {
-		err = echo(c, l)
-		if websocket.CloseStatus(err) == websocket.StatusNormalClosure {
-			return
-		}
-		if err != nil {
-			s.logf("failed to echo with %v: %v", r.RemoteAddr, err)
-			return
-		}
-	}
+	ms.serveMux.HandleFunc("/subscribe", ms.subscribeHandler)
+	ms.serveMux.HandleFunc("/publish", ms.publishHandler)
+}
+
+func (s *messageServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.serveMux.ServeHTTP(w, r)
 
 }
 
-func echo(c *websocket.Conn, l *rate.Limiter) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+func writeTimeout(ctx context.Context, timeout time.Duration, c *websocket.Conn, msg []byte) error {
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	err := l.Wait(ctx)
-	if err != nil {
-		return err
-	}
-
-	typ, r, err := c.Reader(ctx)
-	if err != nil {
-		return err
-	}
-
-	w, err := c.Writer(ctx, typ)
-	if err != nil {
-		return err
-	}
-
-	_, err = io.Copy(w, r)
-	if err != nil {
-		return fmt.Errorf("failed to io.Copy: %w", err)
-	}
-
-	err = w.Close()
-	return err
+	return c.Write(ctx, websocket.MessageText, msg)
 }
