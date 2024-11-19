@@ -14,3 +14,7 @@ func (p *Player) DrawCards(d *Deck, numberOfCards int) {
 	}
 	fmt.Printf("Cards drawn: %v \n", p.Hand)
 }
+
+func (p *Player) Draw(d *Deck) Card {
+	return (*d).Draw()
+}
