@@ -3,10 +3,12 @@ package server
 import (
 	"context"
 	"io"
+	"log"
 	"net/http"
 )
 
 func (ms *messageServer) publish(msg []byte) {
+	log.Println("Publishing message")
 	ms.subscribersMu.Lock()
 	defer ms.subscribersMu.Unlock()
 

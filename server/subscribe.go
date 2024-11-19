@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"log"
 	"net"
 	"net/http"
 	"sync"
@@ -47,6 +48,7 @@ func (ms *messageServer) subscribe(w http.ResponseWriter, r *http.Request) error
 	for {
 		select {
 		case msg := <-s.msgs:
+			log.Printf("Message received: %s", msg)
 			err := writeTimeout(ctx, time.Second*5, c, msg)
 			if err != nil {
 				return err
@@ -73,6 +75,7 @@ func (s *messageServer) subscribeHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (ms *messageServer) addSubscriber(s *subscriber) {
+	log.Println("Adding a subscriber")
 	ms.subscribersMu.Lock()
 	ms.subscribers[s] = struct{}{}
 	ms.subscribersMu.Unlock()

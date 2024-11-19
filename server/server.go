@@ -11,7 +11,7 @@ import (
 )
 
 func Start() error {
-	l, err := net.Listen("tcp", "localhost:0")
+	l, err := net.Listen("tcp", "localhost:9000")
 	if err != nil {
 		log.Printf("Error found: %v \n", err)
 		return err
