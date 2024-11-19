@@ -27,3 +27,7 @@ func (p *Player) CalculateScore() int {
 	}
 	return score
 }
+
+func (p *Player) Look(cardNum int) (string, string) {
+	return p.Hand[cardNum].Show()
+}
