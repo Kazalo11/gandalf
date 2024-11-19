@@ -37,3 +37,7 @@ func (p *Player) PlayCard(cardNum int, d *Discard) {
 	p.Hand = append(p.Hand[:cardNum], p.Hand[cardNum+1:]...)
 	(*d).AddCard(card)
 }
+
+func (p *Player) SwapCards(p2 *Player, cardNum1, cardNum2 int) {
+	p.Hand[cardNum1], p2.Hand[cardNum2] = p2.Hand[cardNum1], p.Hand[cardNum1]
+}
