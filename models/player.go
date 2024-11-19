@@ -4,11 +4,22 @@ import (
 	"fmt"
 
 	"log"
+
+	"github.com/google/uuid"
 )
 
 type Player struct {
 	Name string
 	Hand Deck
+	Id   uuid.UUID
+}
+
+func InitPlayer(name string) Player {
+	return Player{
+		Name: name,
+		Hand: Deck{},
+		Id:   uuid.New(),
+	}
 }
 
 func (p *Player) DrawCards(d *Deck, numberOfCards int) {

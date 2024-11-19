@@ -12,7 +12,9 @@ type Game struct {
 func (g *Game) InitGame(numOfPlayers int) {
 	g.Deck = models.InitDeck()
 	for i := 0; i < numOfPlayers; i++ {
-
+		player := models.InitPlayer("Kazal")
+		player.DrawCards(&g.Deck, 4)
+		g.Players = append(g.Players, player)
 	}
 
 }
