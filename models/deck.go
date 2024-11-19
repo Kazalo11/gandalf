@@ -28,3 +28,7 @@ func (d *Deck) DrawFromDeck() Card {
 	return card
 
 }
+
+func (d *Deck) IsEmpty() bool {
+	return len(*d) == 0
+}
