@@ -18,3 +18,12 @@ func (p *Player) DrawCards(d *Deck, numberOfCards int) {
 func (p *Player) Draw(d *Deck) Card {
 	return (*d).DrawFromDeck()
 }
+
+func (p *Player) CalculateScore() int {
+	score := 0
+	for _, card := range p.Hand {
+		score += card.Value()
+
+	}
+	return score
+}
