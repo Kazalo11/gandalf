@@ -34,6 +34,8 @@ func initMessageServer() *messageServer {
 
 	ms.serveMux.HandleFunc("/subscribe", ms.subscribeHandler)
 	ms.serveMux.HandleFunc("/publish", ms.publishHandler)
+
+	return ms
 }
 
 func (s *messageServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
