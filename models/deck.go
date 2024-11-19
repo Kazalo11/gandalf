@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 
 	"golang.org/x/exp/rand"
@@ -22,10 +23,13 @@ func InitDeck() Deck {
 	return deck
 }
 
-func (d *Deck) DrawFromDeck() Card {
+func (d *Deck) DrawFromDeck() (Card, error) {
+	if d.IsEmpty() {
+		return Card{0, 0}, errors.New("Can't draw a card, deck is empty")
+	}
 	card := (*d)[len(*d)-1]
 	(*d) = (*d)[:len(*d)-1]
-	return card
+	return card, nil
 
 }
 

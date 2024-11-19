@@ -1,6 +1,10 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+
+	"log"
+)
 
 type Player struct {
 	Name string
@@ -9,14 +13,24 @@ type Player struct {
 
 func (p *Player) DrawCards(d *Deck, numberOfCards int) {
 	for i := 0; i < numberOfCards; i++ {
-		p.Hand = append(p.Hand, (*d).DrawFromDeck())
+		card, err := (*d).DrawFromDeck()
+		if err != nil {
+			log.Printf("Couldn't withdraw a card due to: %v", err)
+		} else {
+
+			p.Hand = append(p.Hand, card)
+		}
 
 	}
 	fmt.Printf("Cards drawn: %v \n", p.Hand)
 }
 
 func (p *Player) Draw(d *Deck) Card {
-	return (*d).DrawFromDeck()
+	card, err := (*d).DrawFromDeck()
+	if err != nil {
+		log.Printf("Couldn't withdraw a card due to: %v", err)
+	}
+	return card
 }
 
 func (p *Player) CalculateScore() int {
