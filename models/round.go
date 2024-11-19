@@ -12,3 +12,7 @@ func (r *Round) NextTurn() {
 	(*r).Turn -= 1
 
 }
+
+func (r *Round) SkipTurn() {
+	(*r).Turn -= 2
+}
