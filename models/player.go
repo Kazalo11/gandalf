@@ -16,7 +16,9 @@ type Player struct {
 
 type UUIDGenerator func() uuid.UUID
 
-var DefaultUUIDGenerator UUIDGenerator = uuid.New
+var DefaultUUIDGenerator = func() uuid.UUID {
+	return uuid.New()
+}
 
 func InitPlayer(name string) Player {
 	return Player{

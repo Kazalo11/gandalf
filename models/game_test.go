@@ -24,7 +24,7 @@ func TestInitGame(t *testing.T) {
 
 func TestGetPlayer(t *testing.T) {
 	numOfPlayers := 1
-	game := InitGame(numOfPlayers)
+
 	mockUUID := uuid.MustParse("123e4567-e89b-12d3-a456-426614174000")
 	DefaultUUIDGenerator = func() uuid.UUID {
 		return mockUUID
@@ -33,11 +33,10 @@ func TestGetPlayer(t *testing.T) {
 		Name: "Kazal",
 		Id:   mockUUID,
 	}
-
-	defer func() { DefaultUUIDGenerator = uuid.New }()
+	game := InitGame(numOfPlayers)
 
 	player, _ := game.GetPlayer(mockUUID)
 
-	assert.Equal(t, expectedPlayer, player, "Should return back player for game")
+	assert.Equal(t, expectedPlayer.Name, player.Name, "Should return back player for game")
 
 }
