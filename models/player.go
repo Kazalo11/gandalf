@@ -14,11 +14,15 @@ type Player struct {
 	Id   uuid.UUID
 }
 
+type UUIDGenerator func() uuid.UUID
+
+var DefaultUUIDGenerator UUIDGenerator = uuid.New
+
 func InitPlayer(name string) Player {
 	return Player{
 		Name: name,
 		Hand: Deck{},
-		Id:   uuid.New(),
+		Id:   DefaultUUIDGenerator(),
 	}
 }
 
