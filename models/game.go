@@ -10,13 +10,17 @@ type Game struct {
 	Deck    Deck
 	Discard Discard
 	Players []Player
-	Rounds  []Round
+	Round   Round
 }
 
 func InitGame(numOfPlayers int) Game {
 	g := Game{}
 	g.Deck = InitDeck()
 	g.Discard = Discard{}
+	g.Round = Round{
+		Turns:     numOfPlayers,
+		IsGandalf: false,
+	}
 	for i := 0; i < numOfPlayers; i++ {
 		player := InitPlayer("Kazal")
 		player.DrawCards(&g.Deck, 4)

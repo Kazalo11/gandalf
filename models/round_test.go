@@ -7,18 +7,18 @@ func TestNextTurn(t *testing.T) {
 		initialTurn  int
 		expectedTurn int
 	}{
-		{initialTurn: 5, expectedTurn: 4},
-		{initialTurn: 1, expectedTurn: 0},
-		{initialTurn: 0, expectedTurn: 0},
+		{initialTurn: 2, expectedTurn: 3},
+		{initialTurn: 1, expectedTurn: 2},
+		{initialTurn: 3, expectedTurn: 0},
 	}
 
 	for _, tt := range tests {
 		t.Run("Testing NextTurn", func(t *testing.T) {
-			round := Round{Turn: tt.initialTurn}
+			round := Round{CurrentTurn: tt.initialTurn, Turns: 4}
 			round.NextTurn()
 
-			if round.Turn != tt.expectedTurn {
-				t.Errorf("Expected Turn %d, got %d", tt.expectedTurn, round.Turn)
+			if round.CurrentTurn != tt.expectedTurn {
+				t.Errorf("Expected Turn %d, got %d", tt.expectedTurn, round.CurrentTurn)
 			}
 		})
 	}
@@ -29,18 +29,18 @@ func TestSkipTurn(t *testing.T) {
 		initialTurn  int
 		expectedTurn int
 	}{
-		{initialTurn: 5, expectedTurn: 3},
-		{initialTurn: 2, expectedTurn: 0},
-		{initialTurn: 1, expectedTurn: 0},
+		{initialTurn: 2, expectedTurn: 4},
+		{initialTurn: 1, expectedTurn: 3},
+		{initialTurn: 3, expectedTurn: 0},
 	}
 
 	for _, tt := range tests {
 		t.Run("Testing SkipTurn", func(t *testing.T) {
-			round := Round{Turn: tt.initialTurn}
+			round := Round{CurrentTurn: tt.initialTurn, Turns: 5}
 			round.SkipTurn()
 
-			if round.Turn != tt.expectedTurn {
-				t.Errorf("Expected Turn %d, got %d", tt.expectedTurn, round.Turn)
+			if round.CurrentTurn != tt.expectedTurn {
+				t.Errorf("Expected Turn %d, got %d", tt.expectedTurn, round.CurrentTurn)
 			}
 		})
 	}

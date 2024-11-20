@@ -66,3 +66,10 @@ func (p *Player) PlayCard(cardNum int, d *Discard) {
 func (p *Player) SwapCards(p2 *Player, cardNum1, cardNum2 int) {
 	p.Hand[cardNum1], p2.Hand[cardNum2] = p2.Hand[cardNum1], p.Hand[cardNum1]
 }
+
+func (p *Player) CallGandalf(g *Game) {
+	finalRound := Round{
+		Turns: len(g.Players) - 1,
+	}
+	g.Round = finalRound
+}
