@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/coder/websocket"
 )
@@ -49,10 +48,8 @@ func (ms *messageServer) subscribe(w http.ResponseWriter, r *http.Request) error
 		select {
 		case msg := <-s.msgs:
 			log.Printf("Message received: %s", msg)
-			err := writeTimeout(ctx, time.Second*5, c, msg)
-			if err != nil {
-				return err
-			}
+			handleMessage(msg)
+
 		case <-ctx.Done():
 			return ctx.Err()
 		}

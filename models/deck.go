@@ -25,7 +25,7 @@ func InitDeck() Deck {
 
 func (d *Deck) DrawFromDeck() (Card, error) {
 	if d.IsEmpty() {
-		return Card{0, 0}, errors.New("Can't draw a card, deck is empty")
+		return Card{0, 0}, errors.New("can't draw a card, deck is empty")
 	}
 	card := (*d)[len(*d)-1]
 	(*d) = (*d)[:len(*d)-1]
