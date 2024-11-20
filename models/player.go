@@ -69,7 +69,9 @@ func (p *Player) SwapCards(p2 *Player, cardNum1, cardNum2 int) {
 
 func (p *Player) CallGandalf(g *Game) {
 	finalRound := Round{
-		Turns: len(g.Players) - 1,
+		Turns:       len(g.Players) - 1,
+		IsGandalf:   true,
+		CurrentTurn: g.Round.CurrentTurn,
 	}
 	g.Round = finalRound
 }
