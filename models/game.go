@@ -43,7 +43,7 @@ func (g *Game) GetPlayer(id uuid.UUID) (Player, error) {
 func (g *Game) EndGame() (bool, Player) {
 	maxScore := 0
 	var winningPlayer Player
-	if !g.Round.IsGandalf {
+	if !g.Round.IsGandalf || g.Round.CurrentTurn != g.Round.Turns {
 		return false, winningPlayer
 	}
 

@@ -10,7 +10,7 @@ import (
 
 type Player struct {
 	Name string
-	Hand Deck
+	Hand []Card
 	Id   uuid.UUID
 }
 
@@ -23,7 +23,7 @@ var DefaultUUIDGenerator = func() uuid.UUID {
 func InitPlayer(name string) Player {
 	return Player{
 		Name: name,
-		Hand: Deck{},
+		Hand: []Card{},
 		Id:   DefaultUUIDGenerator(),
 	}
 }
