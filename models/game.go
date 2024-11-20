@@ -39,3 +39,22 @@ func (g *Game) GetPlayer(id uuid.UUID) (Player, error) {
 	return Player{}, errors.New("couldn't find that player in the game")
 
 }
+
+func (g *Game) EndGame() (bool, Player) {
+	maxScore := 0
+	var winningPlayer Player
+	if !g.Round.IsGandalf {
+		return false, winningPlayer
+	}
+
+	for _, player := range g.Players {
+		score := player.CalculateScore()
+		if score > maxScore {
+			maxScore = score
+			winningPlayer = player
+		}
+
+	}
+	return true, winningPlayer
+
+}
