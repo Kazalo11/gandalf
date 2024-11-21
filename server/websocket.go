@@ -1,51 +1,64 @@
 package server
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/coder/websocket"
+	"github.com/Kazalo11/gandalf/models"
+	"github.com/google/uuid"
 	"golang.org/x/time/rate"
 )
 
-type messageServer struct {
+type GameServer struct {
 	logf                    func(f string, v ...interface{})
 	subscriberMessageBuffer int
 	publishLimiter          *rate.Limiter
-	subscribers             map[*subscriber]struct{}
+	games                   map[uuid.UUID]*models.Game
+	gamesMu                 sync.Mutex
 	serveMux                http.ServeMux
-	subscribersMu           sync.Mutex
 }
-type subscriber struct {
+
+type subscribe struct {
 	msgs      chan []byte
 	closeSlow func()
 }
 
-func initMessageServer() *messageServer {
-	ms := &messageServer{
+func initGameServer() *GameServer {
+	gs := &GameServer{
 		subscriberMessageBuffer: 16,
 		logf:                    log.Printf,
-		subscribers:             make(map[*subscriber]struct{}),
+		games:                   make(map[uuid.UUID]*models.Game),
 		publishLimiter:          rate.NewLimiter(rate.Every(time.Millisecond*100), 8),
 	}
 
-	ms.serveMux.HandleFunc("/subscribe", ms.subscribeHandler)
-	ms.serveMux.HandleFunc("/publish", ms.publishHandler)
+	gs.serveMux.HandleFunc("/join", gs.joinGameHandler)
+	gs.serveMux.HandleFunc("/leave", gs.leaveGameHandler)
+	gs.serveMux.HandleFunc("/publish", gs.publishHandler)
 
-	return ms
+	return gs
 }
 
-func (s *messageServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *GameServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.serveMux.ServeHTTP(w, r)
-
 }
 
-func writeTimeout(ctx context.Context, timeout time.Duration, c *websocket.Conn, msg []byte) error {
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
+func (s *GameServer) joinGameHandler(w http.ResponseWriter, r *http.Request) {
 
-	return c.Write(ctx, websocket.MessageText, msg)
+	gameID := r.URL.Query().Get("game")
+	if gameID == "" {
+		http.Error(w, "Missing game ID", http.StatusBadRequest)
+		return
+	}
+
+	ID := uuid.MustParse(gameID)
+
+	s.gamesMu.Lock()
+	g, exists := s.games[ID]
+
+	if !exists {
+		g = models.InitGame(0)
+	}
+
 }

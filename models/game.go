@@ -7,14 +7,16 @@ import (
 )
 
 type Game struct {
+	ID      uuid.UUID
 	Deck    Deck
 	Discard Discard
 	Players []Player
 	Round   Round
 }
 
-func InitGame(numOfPlayers int) Game {
+func InitGame(numOfPlayers int) *Game {
 	g := Game{}
+	g.ID = uuid.New()
 	g.Deck = InitDeck()
 	g.Discard = Discard{}
 	g.Round = Round{
@@ -26,7 +28,7 @@ func InitGame(numOfPlayers int) Game {
 		player.DrawCards(&g.Deck, 4)
 		g.Players = append(g.Players, player)
 	}
-	return g
+	return &g
 
 }
 
