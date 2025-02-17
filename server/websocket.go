@@ -1,72 +1,60 @@
 package server
 
 import (
-	"context"
 	"fmt"
-	"io"
 	"net/http"
-	"time"
+	"sync"
 
-	"github.com/coder/websocket"
-	"golang.org/x/time/rate"
+	"github.com/gorilla/websocket"
 )
 
-type messageServer struct {
-	logf func(f string, v ...interface{})
-}
+var (
+	upgrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+	clients   = make(map[*websocket.Conn]bool)
+	broadcast = make(chan []byte)
+	mutex     = &sync.Mutex{}
+)
 
-func (s messageServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	c, err := websocket.Accept(w, r, &websocket.AcceptOptions{
-		Subprotocols: []string{"message"},
-	})
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		s.logf("%v", err)
+		fmt.Println("Error upgrading:", err)
 		return
 	}
-	defer c.CloseNow()
+	defer conn.Close()
+	mutex.Lock()
+	clients[conn] = true
+	mutex.Unlock()
 
-	if c.Subprotocol() != "message" {
-		c.Close(websocket.StatusPolicyViolation, "client must speak the message subprotocol")
-		return
-	}
-	l := rate.NewLimiter(rate.Every(time.Millisecond*100), 10)
 	for {
-		err = echo(c, l)
-		if websocket.CloseStatus(err) == websocket.StatusNormalClosure {
-			return
-		}
+		_, message, err := conn.ReadMessage()
 		if err != nil {
-			s.logf("failed to echo with %v: %v", r.RemoteAddr, err)
-			return
+			mutex.Lock()
+			delete(clients, conn)
+			mutex.Unlock()
+			break
 		}
+		broadcast <- message
 	}
 
 }
 
-func echo(c *websocket.Conn, l *rate.Limiter) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
+func handleMessages() {
+	for {
+		message := <-broadcast
 
-	err := l.Wait(ctx)
-	if err != nil {
-		return err
+		mutex.Lock()
+		for client := range clients {
+			err := client.WriteMessage(websocket.TextMessage, message)
+			if err != nil {
+				client.Close()
+				delete(clients, client)
+			}
+		}
+		mutex.Unlock()
 	}
-
-	typ, r, err := c.Reader(ctx)
-	if err != nil {
-		return err
-	}
-
-	w, err := c.Writer(ctx, typ)
-	if err != nil {
-		return err
-	}
-
-	_, err = io.Copy(w, r)
-	if err != nil {
-		return fmt.Errorf("failed to io.Copy: %w", err)
-	}
-
-	err = w.Close()
-	return err
 }
