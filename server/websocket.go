@@ -32,6 +32,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		_, message, err := conn.ReadMessage()
+		fmt.Printf("Received %s \n", message)
 		if err != nil {
 			mutex.Lock()
 			delete(clients, conn)
@@ -49,11 +50,13 @@ func handleMessages() {
 
 		mutex.Lock()
 		for client := range clients {
+			fmt.Printf("Broadcasting message: %s \n", message)
 			err := client.WriteMessage(websocket.TextMessage, message)
 			if err != nil {
 				client.Close()
 				delete(clients, client)
 			}
+
 		}
 		mutex.Unlock()
 	}
