@@ -40,7 +40,7 @@ type Client struct {
 	player *models.Player
 }
 
-func (c *Client) readPump() {
+func (c *Client) sendMessages() {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -58,11 +58,19 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		_, err = parseMessage(message)
+		if err != nil {
+			fmt.Printf("Can't parse message due to %v, not sending\n", err)
+			continue
+
+		}
+
 		c.hub.broadcast <- message
+
 	}
 }
 
-func (c *Client) writePump() {
+func (c *Client) receiveMessages() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
@@ -126,7 +134,7 @@ func connectToHub(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	}()
 	fmt.Println("Registering client in hub")
 
-	go client.writePump()
-	go client.readPump()
+	go client.receiveMessages()
+	go client.sendMessages()
 
 }
