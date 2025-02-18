@@ -44,7 +44,14 @@ func (h *Hub) run() {
 				close(client.send)
 			}
 		case message := <-h.broadcast:
-			fmt.Printf("Broadcasting message: %s\n", message)
+			fmt.Printf("Receieved message at hub: %s\n", message)
+
+			parsedMessage, err := parseMessage(message)
+			if err != nil {
+				fmt.Printf("Unable to parse error due to %v", err)
+				continue
+			}
+			fmt.Printf("Parsed message receieved %s", parsedMessage)
 			for client := range h.clients {
 				select {
 				case client.send <- message:
