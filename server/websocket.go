@@ -19,7 +19,7 @@ var (
 	clients   = []*websocket.Conn{}
 )
 
-func handleMessages() {
+func broadcastReceivedMessages() {
 	for {
 		message := <-broadcast
 
@@ -38,5 +38,27 @@ func handleMessages() {
 
 		clients = activeClients
 		mutex.Unlock()
+	}
+}
+
+func sendMessage(conn *websocket.Conn) {
+	defer conn.Close()
+
+	for {
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			fmt.Printf("Error reading message: %v\n", err)
+			break
+		}
+		fmt.Printf("Received %s \n", message)
+
+		m, err := parseMessage(message)
+		if err != nil {
+			fmt.Printf("Error parsing message: %v\n", err)
+			continue
+		}
+		fmt.Printf("Message parsed: %v\n", m)
+
+		broadcast <- message
 	}
 }

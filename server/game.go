@@ -47,18 +47,12 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 		conn.Close()
 	} else {
 		game.AddPlayer(*player)
-		fmt.Println("Added player to the game")
+		message := "Added player to the game"
+		broadcast <- []byte(message)
 	}
 
-	go handleMessages()
-	for {
-		_, message, err := conn.ReadMessage()
-		fmt.Printf("Received %s \n", message)
-		if err != nil {
-			break
-		}
-		broadcast <- message
-	}
+	go broadcastReceivedMessages()
+	sendMessage(conn)
 
 }
 
@@ -110,15 +104,8 @@ func CreateGame(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Added player to the game")
 	}
 
-	go handleMessages()
+	go broadcastReceivedMessages()
 
-	for {
-		_, message, err := conn.ReadMessage()
-		fmt.Printf("Received %s \n", message)
-		if err != nil {
-			break
-		}
-		broadcast <- message
-	}
+	sendMessage(conn)
 
 }
