@@ -1,6 +1,8 @@
 package internals
 
-import "github.com/Kazalo11/gandalf/models"
+import (
+	"github.com/Kazalo11/gandalf/models"
+)
 
 type Game struct {
 	Deck    models.Deck

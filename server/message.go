@@ -50,7 +50,6 @@ func parseMessage(message []byte) (Message, error) {
 	var m Message
 	err := json.Unmarshal(message, &m)
 	if err != nil {
-		fmt.Println("Can't parse message due to error: ", err)
 		return Message{}, err
 	}
 	return m, nil
