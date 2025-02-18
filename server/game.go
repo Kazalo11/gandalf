@@ -36,7 +36,10 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 		conn.Close()
 	}
 
+	mutex.Lock()
+	clients = append(clients, conn)
 	gameConns[gameId] = append(gameConns[gameId], conn)
+	mutex.Unlock()
 
 	player := createPlayer(*game)
 	if player == nil {
@@ -46,7 +49,8 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 		game.AddPlayer(*player)
 		fmt.Println("Added player to the game")
 	}
-	go handleMessages(gameConns[gameId])
+
+	go handleMessages()
 	for {
 		_, message, err := conn.ReadMessage()
 		fmt.Printf("Received %s \n", message)
@@ -87,6 +91,7 @@ func CreateGame(w http.ResponseWriter, r *http.Request) {
 	gameId := uuid.New()
 	games[gameId] = game
 
+	clients = append(clients, conn)
 	gameConns[gameId] = append(gameConns[gameId], conn)
 	mutex.Unlock()
 
@@ -105,7 +110,7 @@ func CreateGame(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Added player to the game")
 	}
 
-	go handleMessages(gameConns[gameId])
+	go handleMessages()
 
 	for {
 		_, message, err := conn.ReadMessage()

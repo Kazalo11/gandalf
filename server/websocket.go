@@ -16,9 +16,10 @@ var (
 	}
 	broadcast = make(chan []byte)
 	mutex     = &sync.Mutex{}
+	clients   = []*websocket.Conn{}
 )
 
-func handleMessages(clients []*websocket.Conn) {
+func handleMessages() {
 	for {
 		message := <-broadcast
 
