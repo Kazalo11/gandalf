@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/Kazalo11/gandalf/models"
@@ -28,6 +29,7 @@ const (
 var (
 	newline = []byte{'\n'}
 	space   = []byte{' '}
+	mutex   sync.Mutex
 )
 
 type Client struct {
@@ -105,15 +107,17 @@ func connectToHub(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	}
 
 	game := hub.game
-	player := createPlayer(*game)
+	mutex.Lock()
+	player := createPlayer(game)
 
 	if player == nil {
 		fmt.Println("Failed to create player")
 		conn.Close()
-	} else {
-		game.AddPlayer(*player)
-
+		return
 	}
+	fmt.Println(*player)
+	game.AddPlayer(*player)
+	mutex.Unlock()
 
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), player: player}
 	go func() {

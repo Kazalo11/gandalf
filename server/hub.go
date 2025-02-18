@@ -52,6 +52,7 @@ func (h *Hub) run() {
 				continue
 			}
 			fmt.Printf("Parsed message receieved %s", parsedMessage)
+			processMessage(parsedMessage, h.game)
 			for client := range h.clients {
 				select {
 				case client.send <- message:
