@@ -9,10 +9,12 @@ type Game struct {
 	Rounds  []models.Round
 }
 
-func (g *Game) InitGame(numOfPlayers int) {
+func InitGame() *Game {
+	g := Game{}
 	g.Deck = models.InitDeck()
-	for i := 0; i < numOfPlayers; i++ {
+	return &g
+}
 
-	}
-
+func (g *Game) AddPlayer(p models.Player) {
+	g.Players = append(g.Players, p)
 }

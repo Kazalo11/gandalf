@@ -14,50 +14,28 @@ var (
 			return true
 		},
 	}
-	clients   = make(map[*websocket.Conn]bool)
 	broadcast = make(chan []byte)
 	mutex     = &sync.Mutex{}
 )
 
-func wsHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		fmt.Println("Error upgrading:", err)
-		return
-	}
-	defer conn.Close()
-	mutex.Lock()
-	clients[conn] = true
-	mutex.Unlock()
-
-	for {
-		_, message, err := conn.ReadMessage()
-		fmt.Printf("Received %s \n", message)
-		if err != nil {
-			mutex.Lock()
-			delete(clients, conn)
-			mutex.Unlock()
-			break
-		}
-		broadcast <- message
-	}
-
-}
-
-func handleMessages() {
+func handleMessages(clients []*websocket.Conn) {
 	for {
 		message := <-broadcast
 
 		mutex.Lock()
-		for client := range clients {
-			fmt.Printf("Broadcasting message: %s \n", message)
+		fmt.Printf("Broadcasting message: %s \n", message)
+
+		var activeClients []*websocket.Conn
+		for _, client := range clients {
 			err := client.WriteMessage(websocket.TextMessage, message)
 			if err != nil {
 				client.Close()
-				delete(clients, client)
+				continue
 			}
-
+			activeClients = append(activeClients, client)
 		}
+
+		clients = activeClients
 		mutex.Unlock()
 	}
 }
