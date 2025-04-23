@@ -49,7 +49,6 @@ func (p *Player) CalculateScore() int {
 	score := 0
 	for _, card := range p.Hand {
 		score += card.Value()
-
 	}
 	return score
 }

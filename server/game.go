@@ -47,7 +47,7 @@ func CreateGame(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func createPlayer(game internals.Game) *models.Player {
+func createPlayer(game *internals.Game) *models.Player {
 	playerId := uuid.New()
 	name := "Kazal"
 	hand := []models.Card{}
