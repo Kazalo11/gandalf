@@ -10,10 +10,12 @@ type Game struct {
 	Discard models.Discard
 	Players map[uuid.UUID]*models.Player
 	Rounds  []models.Round
+	Id      uuid.UUID
 }
 
 func InitGame() *Game {
 	g := Game{}
+	g.Id = uuid.New()
 	g.Deck = models.InitDeck()
 	g.Players = make(map[uuid.UUID]*models.Player)
 	return &g
