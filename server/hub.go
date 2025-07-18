@@ -17,7 +17,8 @@ type Hub struct {
 
 	unregister chan *Client
 
-	game *internals.Game
+	game      *internals.Game
+	playerMap map[uuid.UUID]*Client
 }
 
 var (
@@ -31,6 +32,7 @@ func newHub(g *internals.Game) *Hub {
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
 		game:       g,
+		playerMap:  make(map[uuid.UUID]*Client),
 	}
 }
 
@@ -39,9 +41,11 @@ func (h *Hub) run() {
 		select {
 		case client := <-h.register:
 			h.clients[client] = true
+			h.playerMap[client.player.Id] = client
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
+				h.playerMap[client.player.Id] = nil
 				close(client.send)
 			}
 		case message := <-h.broadcast:

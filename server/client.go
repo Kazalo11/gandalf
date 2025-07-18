@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/Kazalo11/gandalf/models"
 	"github.com/Kazalo11/gandalf/server/messages"
 	"log"
 	"net/http"
-	"sync"
 	"time"
 
-	"github.com/Kazalo11/gandalf/models"
 	"github.com/gorilla/websocket"
 )
 
@@ -27,7 +26,6 @@ const (
 var (
 	newline = []byte{'\n'}
 	space   = []byte{' '}
-	mutex   sync.Mutex
 )
 
 type Client struct {
@@ -123,7 +121,7 @@ func (c *Client) receiveMessages() {
 	}
 }
 
-func connectToHub(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func connectToHub(hub *Hub, p *models.Player, w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Connecting to hub")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -131,23 +129,19 @@ func connectToHub(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	game := hub.game
-	mutex.Lock()
-	player := createPlayer(game)
-
-	if player == nil {
-		fmt.Println("Failed to create player")
-		err := conn.Close()
+	response := GameResponse{
+		GameID:   hub.game.Id,
+		PlayerID: p.Id,
+	}
+	msg, err := json.Marshal(response)
+	if err == nil {
+		err := conn.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
 			return
 		}
-		return
 	}
-	fmt.Println(*player)
-	game.AddPlayer(*player)
-	mutex.Unlock()
 
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), player: player}
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), player: p}
 	go func() {
 		client.hub.register <- client
 		msg := fmt.Sprintf("Player %s has created the game", client.player.Name)
