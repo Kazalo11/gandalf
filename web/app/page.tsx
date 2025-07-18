@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 type CreateGameResponse = {
     gameId: string;
-    playerName: string;
+    playerId: string;
 }
 
 export default function Home() {
@@ -28,7 +28,8 @@ const handleCreateGame = useCallback(() => {
     console.log('Message received:', event.data);
     const response: CreateGameResponse = JSON.parse(event.data);
     if (response.gameId) {
-    router.push('/game/' + response.gameId);
+      localStorage.setItem("playerId", response.playerId);
+      router.push('/game/' + response.gameId);
     }
 
   };
@@ -45,7 +46,7 @@ const handleJoinGame = useCallback(() => {
     alert('Please enter both Game ID and your name');
     return;
   }
-  const ws = new WebSocket(`ws://localhost:8080/ws/join/${encodeURIComponent(gameId)}?name=${encodeURIComponent(playerName)}`);
+  const ws = new WebSocket(`ws://localhost:8080/ws/game/${encodeURIComponent(gameId)}/join?name=${encodeURIComponent(playerName)}`);
   ws.onopen = () => {
     console.log('WebSocket connection established for joining game');
   }
@@ -53,6 +54,7 @@ const handleJoinGame = useCallback(() => {
     console.log('Message received:', event.data);
     const response: CreateGameResponse = JSON.parse(event.data);
     if (response.gameId) {
+      localStorage.setItem("playerId", response.playerId);
       router.push('/game/' + response.gameId);
     }
   };

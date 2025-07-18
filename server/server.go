@@ -15,7 +15,8 @@ var upgrader = websocket.Upgrader{
 
 func Start() {
 	http.HandleFunc("/ws/create", CreateGame)
-	http.HandleFunc("/ws/join/{id}", JoinGame)
+	http.HandleFunc("/ws/game/{id}/join", JoinGame)
+	http.HandleFunc("/ws/game/{id}/player/{playerId}", GetPlayer)
 	fmt.Println("WebSocket server started on :8080")
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
