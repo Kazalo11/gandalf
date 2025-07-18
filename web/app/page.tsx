@@ -22,7 +22,7 @@ const handleCreateGame = useCallback(() => {
   }
   const ws = new WebSocket(`ws://localhost:8080/ws/create?name=${encodeURIComponent(playerName)}`);
   ws.onopen = () => {
-    console.log('WebSocket connection established');
+    console.log('WebSocket connection established for creating game');
   }
   ws.onmessage = (event) => {
     console.log('Message received:', event.data);
@@ -38,7 +38,7 @@ const handleCreateGame = useCallback(() => {
   return () => {
     ws.close();
   };
-},[playerName]);
+},[playerName, router]);
 
 const handleJoinGame = useCallback(() => {
   if (!gameId || !playerName) {
@@ -47,10 +47,14 @@ const handleJoinGame = useCallback(() => {
   }
   const ws = new WebSocket(`ws://localhost:8080/ws/join/${encodeURIComponent(gameId)}'?name=${encodeURIComponent(playerName)}`);
   ws.onopen = () => {
-    console.log('WebSocket connection established');
+    console.log('WebSocket connection established for joining game');
   }
   ws.onmessage = (event) => {
     console.log('Message received:', event.data);
+    const response: CreateGameResponse = JSON.parse(event.data);
+    if (response.gameId) {
+      router.push('/game/' + response.gameId);
+    }
   };
   ws.onclose = () => {
     console.log('WebSocket connection closed');
@@ -58,7 +62,7 @@ const handleJoinGame = useCallback(() => {
   return () => {
     ws.close();
   };
-}, [gameId, playerName]);
+}, [gameId, playerName, router]);
 
 
 return (
