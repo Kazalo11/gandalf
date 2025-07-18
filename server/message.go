@@ -14,8 +14,8 @@ const (
 	ShowCard
 )
 
-func (a Action) String() string {
-	return [...]string{"DrawCard", "PlayCard", "Look", "ShowCard"}[a]
+func (a *Action) String() string {
+	return [...]string{"DrawCard", "PlayCard", "Look", "ShowCard"}[*a]
 }
 
 func (a *Action) UnmarshalJSON(data []byte) error {
