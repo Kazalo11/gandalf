@@ -45,7 +45,7 @@ const handleJoinGame = useCallback(() => {
     alert('Please enter both Game ID and your name');
     return;
   }
-  const ws = new WebSocket(`ws://localhost:8080/ws/join/${encodeURIComponent(gameId)}'?name=${encodeURIComponent(playerName)}`);
+  const ws = new WebSocket(`ws://localhost:8080/ws/join/${encodeURIComponent(gameId)}?name=${encodeURIComponent(playerName)}`);
   ws.onopen = () => {
     console.log('WebSocket connection established for joining game');
   }

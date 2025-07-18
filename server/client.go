@@ -144,7 +144,7 @@ func connectToHub(hub *Hub, p *models.Player, w http.ResponseWriter, r *http.Req
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), player: p}
 	go func() {
 		client.hub.register <- client
-		msg := fmt.Sprintf("Player %s has created the game", client.player.Name)
+		msg := fmt.Sprintf("Player %s has joined the game", client.player.Name)
 		joinMessage := messages.GameMessage{
 			BaseMessage: messages.BaseMessage{
 				Id:          client.hub.game.Id,
