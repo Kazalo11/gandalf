@@ -31,6 +31,12 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 	}
 
 	game := hub.game
+	if len(game.Players) == 4 {
+		http.Error(w, "Game is full", http.StatusBadRequest)
+		log.Println("Game is full")
+		return
+	}
+
 	playerId := uuid.New()
 	p := createPlayer(game, playerId, name)
 	if p == nil {
