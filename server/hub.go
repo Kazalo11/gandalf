@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/Kazalo11/gandalf/server/messages"
 
 	"github.com/Kazalo11/gandalf/internals"
 	"github.com/google/uuid"
@@ -16,7 +17,8 @@ type Hub struct {
 
 	unregister chan *Client
 
-	game *internals.Game
+	game      *internals.Game
+	playerMap map[uuid.UUID]*Client
 }
 
 var (
@@ -30,6 +32,7 @@ func newHub(g *internals.Game) *Hub {
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
 		game:       g,
+		playerMap:  make(map[uuid.UUID]*Client),
 	}
 }
 
@@ -38,21 +41,23 @@ func (h *Hub) run() {
 		select {
 		case client := <-h.register:
 			h.clients[client] = true
+			h.playerMap[client.player.Id] = client
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
+				h.playerMap[client.player.Id] = nil
 				close(client.send)
 			}
 		case message := <-h.broadcast:
 			fmt.Printf("Receieved message at hub: %s\n", message)
 
-			parsedMessage, err := parseMessage(message)
+			parsedMessage, err := messages.ParseMessage(message)
 			if err != nil {
 				fmt.Printf("Unable to parse error due to %v", err)
 				continue
 			}
-			fmt.Printf("Parsed message receieved %s", parsedMessage)
-			processMessage(parsedMessage, h.game)
+			fmt.Printf("Parsed message receieved %+v\n", parsedMessage)
+			//processMessage(parsedMessage, h.game)
 			for client := range h.clients {
 				select {
 				case client.send <- message:

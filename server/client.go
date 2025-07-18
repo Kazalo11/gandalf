@@ -2,13 +2,14 @@ package server
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"github.com/Kazalo11/gandalf/models"
+	"github.com/Kazalo11/gandalf/server/messages"
 	"log"
 	"net/http"
-	"sync"
 	"time"
 
-	"github.com/Kazalo11/gandalf/models"
 	"github.com/gorilla/websocket"
 )
 
@@ -25,7 +26,6 @@ const (
 var (
 	newline = []byte{'\n'}
 	space   = []byte{' '}
-	mutex   sync.Mutex
 )
 
 type Client struct {
@@ -41,11 +41,23 @@ type Client struct {
 func (c *Client) sendMessages() {
 	defer func() {
 		c.hub.unregister <- c
-		c.conn.Close()
+		err := c.conn.Close()
+		if err != nil {
+			return
+		}
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
-	c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	err := c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	if err != nil {
+		return
+	}
+	c.conn.SetPongHandler(func(string) error {
+		err := c.conn.SetReadDeadline(time.Now().Add(pongWait))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 	for {
 		_, message, err := c.conn.ReadMessage()
 		fmt.Printf("Received message: %s\n", message)
@@ -56,7 +68,7 @@ func (c *Client) sendMessages() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		_, err = parseMessage(message)
+		_, err = messages.ParseMessage(message)
 		if err != nil {
 			fmt.Printf("Can't parse message due to %v, not sending\n", err)
 			continue
@@ -72,21 +84,36 @@ func (c *Client) receiveMessages() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.conn.Close()
+		err := c.conn.Close()
+		if err != nil {
+			return
+		}
 	}()
 	for {
 		select {
 		case message, ok := <-c.send:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err != nil {
+				return
+			}
 			if !ok {
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				err := c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				if err != nil {
+					return
+				}
 				return
 			}
 
-			c.conn.WriteMessage(websocket.TextMessage, message)
+			err = c.conn.WriteMessage(websocket.TextMessage, message)
+			if err != nil {
+				return
+			}
 
 		case <-ticker.C:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err != nil {
+				return
+			}
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
@@ -94,7 +121,7 @@ func (c *Client) receiveMessages() {
 	}
 }
 
-func connectToHub(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func connectToHub(hub *Hub, p *models.Player, w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Connecting to hub")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -102,22 +129,36 @@ func connectToHub(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	game := hub.game
-	mutex.Lock()
-	player := createPlayer(game)
-
-	if player == nil {
-		fmt.Println("Failed to create player")
-		conn.Close()
-		return
+	response := GameResponse{
+		GameID:   hub.game.Id,
+		PlayerID: p.Id,
 	}
-	fmt.Println(*player)
-	game.AddPlayer(*player)
-	mutex.Unlock()
+	msg, err := json.Marshal(response)
+	if err == nil {
+		err := conn.WriteMessage(websocket.TextMessage, msg)
+		if err != nil {
+			return
+		}
+	}
 
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), player: player}
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), player: p}
 	go func() {
 		client.hub.register <- client
+		msg := fmt.Sprintf("Player %s has created the game", client.player.Name)
+		joinMessage := messages.GameMessage{
+			BaseMessage: messages.BaseMessage{
+				Id:          client.hub.game.Id,
+				MessageType: "GameMessage",
+			},
+			Data: msg,
+		}
+
+		encoded, err := json.Marshal(joinMessage)
+		if err != nil {
+			fmt.Printf("Failed to marshal join message: %v\n", err)
+			return
+		}
+		client.hub.broadcast <- encoded
 	}()
 	fmt.Println("Registering client in hub")
 
