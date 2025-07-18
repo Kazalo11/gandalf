@@ -13,9 +13,9 @@ type Game struct {
 	Id      uuid.UUID
 }
 
-func InitGame() *Game {
+func InitGame(gameId uuid.UUID) *Game {
 	g := Game{}
-	g.Id = uuid.New()
+	g.Id = gameId
 	g.Deck = models.InitDeck()
 	g.Players = make(map[uuid.UUID]*models.Player)
 	return &g

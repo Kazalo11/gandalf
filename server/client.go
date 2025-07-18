@@ -41,11 +41,23 @@ type Client struct {
 func (c *Client) sendMessages() {
 	defer func() {
 		c.hub.unregister <- c
-		c.conn.Close()
+		err := c.conn.Close()
+		if err != nil {
+			return
+		}
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
-	c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	err := c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	if err != nil {
+		return
+	}
+	c.conn.SetPongHandler(func(string) error {
+		err := c.conn.SetReadDeadline(time.Now().Add(pongWait))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 	for {
 		_, message, err := c.conn.ReadMessage()
 		fmt.Printf("Received message: %s\n", message)
@@ -72,21 +84,36 @@ func (c *Client) receiveMessages() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.conn.Close()
+		err := c.conn.Close()
+		if err != nil {
+			return
+		}
 	}()
 	for {
 		select {
 		case message, ok := <-c.send:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err != nil {
+				return
+			}
 			if !ok {
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				err := c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				if err != nil {
+					return
+				}
 				return
 			}
 
-			c.conn.WriteMessage(websocket.TextMessage, message)
+			err = c.conn.WriteMessage(websocket.TextMessage, message)
+			if err != nil {
+				return
+			}
 
 		case <-ticker.C:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err != nil {
+				return
+			}
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
@@ -108,7 +135,10 @@ func connectToHub(hub *Hub, w http.ResponseWriter, r *http.Request) {
 
 	if player == nil {
 		fmt.Println("Failed to create player")
-		conn.Close()
+		err := conn.Close()
+		if err != nil {
+			return
+		}
 		return
 	}
 	fmt.Println(*player)
@@ -118,6 +148,8 @@ func connectToHub(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), player: player}
 	go func() {
 		client.hub.register <- client
+		msg := fmt.Sprintf("Game created with id: %s", client.hub.game.Id)
+		client.hub.broadcast <- []byte(msg)
 	}()
 	fmt.Println("Registering client in hub")
 

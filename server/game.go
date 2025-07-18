@@ -33,14 +33,14 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 
 func CreateGame(w http.ResponseWriter, r *http.Request) {
 
-	hubId := uuid.New()
+	gameId := uuid.New()
 
-	game := internals.InitGame()
-	fmt.Printf("Created game with id: %s\n", hubId)
+	game := internals.InitGame(gameId)
+	fmt.Printf("Created game with id: %s\n", gameId)
 
 	hub := newHub(game)
 
-	hubMap[hubId] = hub
+	hubMap[gameId] = hub
 	connectToHub(hub, w, r)
 
 	go hub.run()
@@ -50,7 +50,7 @@ func CreateGame(w http.ResponseWriter, r *http.Request) {
 func createPlayer(game *internals.Game) *models.Player {
 	playerId := uuid.New()
 	name := "Kazal"
-	hand := []models.Card{}
+	var hand []models.Card
 	for i := 0; i < 4; i++ {
 		card, err := game.Deck.DrawFromDeck()
 		if err != nil {

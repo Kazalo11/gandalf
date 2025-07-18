@@ -30,7 +30,7 @@ func processMessage(m Message, g *internals.Game) models.Card {
 	case ShowCard:
 		fmt.Println("Showing card")
 	default:
-		fmt.Printf("%s is not a valid action", m.Action)
+		fmt.Printf("%s is not a valid action", m.Action.String())
 		return models.Card{}
 	}
 	return models.Card{}

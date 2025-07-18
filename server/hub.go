@@ -51,7 +51,7 @@ func (h *Hub) run() {
 				fmt.Printf("Unable to parse error due to %v", err)
 				continue
 			}
-			fmt.Printf("Parsed message receieved %s", parsedMessage)
+			fmt.Printf("Parsed message receieved %+v\n", parsedMessage)
 			processMessage(parsedMessage, h.game)
 			for client := range h.clients {
 				select {
