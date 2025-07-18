@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/Kazalo11/gandalf/server/messages"
 
 	"github.com/Kazalo11/gandalf/internals"
 	"github.com/google/uuid"
@@ -46,13 +47,13 @@ func (h *Hub) run() {
 		case message := <-h.broadcast:
 			fmt.Printf("Receieved message at hub: %s\n", message)
 
-			parsedMessage, err := parseMessage(message)
+			parsedMessage, err := messages.ParseMessage(message)
 			if err != nil {
 				fmt.Printf("Unable to parse error due to %v", err)
 				continue
 			}
 			fmt.Printf("Parsed message receieved %+v\n", parsedMessage)
-			processMessage(parsedMessage, h.game)
+			//processMessage(parsedMessage, h.game)
 			for client := range h.clients {
 				select {
 				case client.send <- message:

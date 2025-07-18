@@ -2,7 +2,9 @@ package server
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"github.com/Kazalo11/gandalf/server/messages"
 	"log"
 	"net/http"
 	"sync"
@@ -68,7 +70,7 @@ func (c *Client) sendMessages() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		_, err = parseMessage(message)
+		_, err = messages.ParseMessage(message)
 		if err != nil {
 			fmt.Printf("Can't parse message due to %v, not sending\n", err)
 			continue
@@ -148,8 +150,21 @@ func connectToHub(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), player: player}
 	go func() {
 		client.hub.register <- client
-		msg := fmt.Sprintf("Game created with id: %s", client.hub.game.Id)
-		client.hub.broadcast <- []byte(msg)
+		msg := fmt.Sprintf("Player %s has created the game", client.player.Name)
+		joinMessage := messages.GameMessage{
+			BaseMessage: messages.BaseMessage{
+				Id:          client.hub.game.Id,
+				MessageType: "GameMessage",
+			},
+			Data: msg,
+		}
+
+		encoded, err := json.Marshal(joinMessage)
+		if err != nil {
+			fmt.Printf("Failed to marshal join message: %v\n", err)
+			return
+		}
+		client.hub.broadcast <- encoded
 	}()
 	fmt.Println("Registering client in hub")
 

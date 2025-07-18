@@ -1,4 +1,4 @@
-package server
+package messages
 
 import (
 	"encoding/json"
@@ -40,18 +40,17 @@ func (a *Action) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type Message struct {
-	Action   Action `json:"action"`
-	PlayerId string `json:"playerId"`
-	Data     any    `json:"data"`
+type PlayerMessage struct {
+	BaseMessage
+	Action Action `json:"action"`
+	Data   any    `json:"data"`
 }
 
-func parseMessage(message []byte) (Message, error) {
-	var m Message
+func parsePlayerMessage(message []byte) (PlayerMessage, error) {
+	var m PlayerMessage
 	err := json.Unmarshal(message, &m)
 	if err != nil {
-		return Message{}, err
+		return PlayerMessage{}, err
 	}
 	return m, nil
-
 }
