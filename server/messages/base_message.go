@@ -15,7 +15,7 @@ type Message interface {
 type BaseMessage struct {
 	Id             uuid.UUID      `json:"id"`
 	MessageType    MessageType    `json:"type"`
-	MessageSubType MessageSubType `json:"subtype"`
+	MessageSubType MessageSubType `json:"subType"`
 }
 
 func (m *BaseMessage) GetType() MessageType {

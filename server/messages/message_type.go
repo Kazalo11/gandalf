@@ -15,11 +15,11 @@ const (
 var (
 	messageTypeToString = map[MessageType]string{
 		PlayerMessageType: "PlayerMessage",
-		GameMessageType:   "GameBaseMessage",
+		GameMessageType:   "GameMessage",
 	}
 	stringToMessageType = map[string]MessageType{
-		"PlayerMessage":   PlayerMessageType,
-		"GameBaseMessage": GameMessageType,
+		"PlayerMessage": PlayerMessageType,
+		"GameMessage":   GameMessageType,
 	}
 )
 

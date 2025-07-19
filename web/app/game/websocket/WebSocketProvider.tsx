@@ -2,6 +2,12 @@
 
 import { createContext, useContext, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+    KnownMessages,
+    ServerMessage,
+    WebSocketHandler,
+    webSocketHandlerMap
+} from "@/app/game/websocket/webSocketHandler";
 
 type JoinGameResponse = {
     gameId: string;
@@ -32,14 +38,18 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
         };
 
         ws.onmessage = (event) => {
-            console.log('Message from server:', event.data);
             try {
-                const data: JoinGameResponse = JSON.parse(event.data);
+            const message: KnownMessages = JSON.parse(event.data);
+            if (!message || !message.type || !message.subType) {
+                console.error('Invalid message format:', event.data);
+                return;
+            }
+            const key = `${message.type}:${message.subType}`;
+            console.log('Received WebSocket message:', key, message);
 
-                if (data.gameId && data.playerId) {
-                    localStorage.setItem('playerId', data.playerId);
-                    router.push('/game/' + data.gameId);
-                }
+            // @ts-expect-error - TypeScript doesn't know about the dynamic keys in webSocketHandlerMap
+            const handler: WebSocketHandler = webSocketHandlerMap[key];
+            handler(message, { router, listeners: listenersRef.current });
 
             } catch (err) {
                 console.error('Failed to parse WebSocket message', err);

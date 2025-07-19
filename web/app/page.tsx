@@ -3,7 +3,7 @@
 import { Box, Button, Center, Flex, Heading, Input, Stack } from '@chakra-ui/react';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import {useWebSocket} from "@/app/game/WebSocketProvider";
+import {useWebSocket} from "@/app/game/websocket/WebSocketProvider";
 
 
 

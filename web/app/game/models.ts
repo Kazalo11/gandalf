@@ -8,3 +8,7 @@ export type PlayingCard = {
     Suit: number
     Rank: number
 }
+
+export type GameState = {
+    Id: string
+}

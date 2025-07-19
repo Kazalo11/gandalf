@@ -6,11 +6,11 @@ import (
 )
 
 type Game struct {
-	Deck    models.Deck
-	Discard models.Discard
-	Players map[uuid.UUID]*models.Player
-	Rounds  []models.Round
-	Id      uuid.UUID
+	Deck    models.Deck                  `json:"deck"`
+	Discard models.Discard               `json:"discard"`
+	Players map[uuid.UUID]*models.Player `json:"players"`
+	Rounds  []models.Round               `json:"rounds"`
+	Id      uuid.UUID                    `json:"id"`
 }
 
 func InitGame(gameId uuid.UUID) *Game {
