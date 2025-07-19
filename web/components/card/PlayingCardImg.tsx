@@ -9,24 +9,22 @@ export type PlayingCardProps = {
 
 export default function PlayingCardImg({card, isHidden}: PlayingCardProps) {
     const imgSrc = mapCardToImagePath(card);
+    const handWidth = 80;
+    const handHeight = 120;
 
     return isHidden ?  (
         <Image
             src={"/cards/back.svg"}
             alt={"Back of card"}
-            width={100}
-            height={140}
-            className="playing-card"
-            draggable="true"
+            width={handWidth}
+            height={handHeight}
         />
     ): (
         <Image
             src={imgSrc}
             alt={`${card.Rank} of ${card.Suit}`}
-            width={100}
-            height={140}
-            className="playing-card"
-            draggable="true"
+            width={handWidth}
+            height={handHeight}
         />
     )
 
