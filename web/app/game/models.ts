@@ -17,7 +17,7 @@ export type Round = {
 export type GameState = {
     id: string
     players: Record<string, Player>
-    deck: PlayingCard[] | null
+    deck: PlayingCard[]
     discard: PlayingCard[] | null
     rounds: Round[] | null
 

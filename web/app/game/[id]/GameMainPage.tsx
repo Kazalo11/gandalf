@@ -5,6 +5,7 @@ import MyHand from "@/components/card/MyHand";
 import {useWebSocket} from "@/app/game/websocket/WebSocketProvider";
 import {GetGameStateMessage} from "@/app/game/websocket/webSocketHandler";
 import {useEffect} from "react";
+import DisplayPage from "@/app/game/[id]/DisplayPage";
 
 export type GameMainPageProps = {
     gameId: string;
@@ -44,10 +45,7 @@ export default function GameMainPage({gameId, player}: GameMainPageProps) {
         gameState ? (
             <VStack>
                 <Heading size={"4xl"}>Gandalf</Heading>
-                <Box {...boxStyles} >
-                    <Deck />
-                    <MyHand hand={playerHand}/>
-                </Box>
+                <DisplayPage game={gameState} currentPlayer={player}/>
             </VStack>
             ) : <Box>Loading...</Box>
 
