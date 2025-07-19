@@ -12,14 +12,7 @@ export type GameMainPageProps = {
     player: Player;
 }
 
-const boxStyles: BoxProps = {
-    w: "900px",
-    h: "800px",
-    bgImage: "url(/deck/deck.svg)",
-    bgSize: "contain",
-    bgRepeat: "no-repeat",
-    display: "flex",
-}
+
 export default function GameMainPage({gameId, player}: GameMainPageProps) {
     const {sendMessage, gameState, socket, reconnect} = useWebSocket();
     useEffect(() => {

@@ -19,7 +19,7 @@ export default function GamePage({
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const playerId = localStorage.getItem("playerId");
+        const playerId = sessionStorage.getItem("playerId");
         if (!playerId) {
             setError("no-player-id");
             setLoading(false);

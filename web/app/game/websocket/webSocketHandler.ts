@@ -49,8 +49,8 @@ export type WebSocketHandlerMap = {
 export const webSocketHandlerMap: WebSocketHandlerMap = {
     "GameMessage:JoinGame": (message: JoinGameMessage, context: HandlerContext) => {
         const { router } = context;
-        localStorage.setItem("playerId", message.playerId);
-        localStorage.setItem("gameId", message.gameId);
+        sessionStorage.setItem("playerId", message.playerId);
+        sessionStorage.setItem("gameId", message.gameId);
         router.push("/game/" + message.gameId);
     },
 

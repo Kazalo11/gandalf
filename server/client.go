@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/Kazalo11/gandalf/models"
-	"github.com/Kazalo11/gandalf/server/messages"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/Kazalo11/gandalf/models"
+	"github.com/Kazalo11/gandalf/server/messages"
 
 	"github.com/gorilla/websocket"
 )
@@ -147,6 +148,21 @@ func connectToHub(hub *Hub, p *models.Player, w http.ResponseWriter, r *http.Req
 		if err != nil {
 			return
 		}
+	}
+	gameStateMessage := messages.GameState{
+		Game: *hub.game,
+		GameBaseMessage: messages.GameBaseMessage{
+			BaseMessage: messages.BaseMessage{
+				Id:             hub.game.Id,
+				MessageType:    messages.GameMessageType,
+				MessageSubType: messages.GameStateMessage,
+			},
+		},
+	}
+
+	gameStateBytes, err := json.Marshal(gameStateMessage)
+	if err == nil {
+		_ = conn.WriteMessage(websocket.TextMessage, gameStateBytes)
 	}
 
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), player: p}

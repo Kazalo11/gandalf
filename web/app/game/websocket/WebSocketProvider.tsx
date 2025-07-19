@@ -93,8 +93,8 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
     }, []);
 
     const reconnect = useCallback(() => {
-        const playerId = localStorage.getItem('playerId');
-        const gameId = localStorage.getItem('gameId');
+        const playerId = sessionStorage.getItem('playerId');
+        const gameId = sessionStorage.getItem('gameId');
         if (!playerId || !gameId) {
             console.warn('Missing playerName or gameId for reconnection');
             return;

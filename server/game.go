@@ -105,12 +105,12 @@ func ReconnectGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player, exists := hub.game.Players[playerUUID]
+	p, exists := hub.game.Players[playerUUID]
 	if !exists {
 		http.Error(w, "Player not found", http.StatusNotFound)
 		log.Printf("Player not found for id: %s", playerId)
 		return
 	}
 
-	connectToHub(hub, player, w, r)
+	connectToHub(hub, p, w, r)
 }

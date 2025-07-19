@@ -29,19 +29,19 @@ export default function Home() {
     joinGame(gameId, playerName);
   }, [gameId, playerName, joinGame]);
 
-  useEffect(() => {
-    const handleMessage = (data: any) => {
-      if (data?.gameId && data?.playerId) {
-        localStorage.setItem('playerId', data.playerId);
-        router.push('/game/' + data.gameId);
-      }
-    };
-
-    addMessageListener(handleMessage);
-    return () => {
-      removeMessageListener(handleMessage);
-    };
-  }, [addMessageListener, removeMessageListener, router]);
+  // useEffect(() => {
+  //   const handleMessage = (data: any) => {
+  //     if (data?.gameId && data?.playerId) {
+  //       sessionStorage.setItem('playerId', data.playerId);
+  //       router.push('/game/' + data.gameId);
+  //     }
+  //   };
+  //
+  //   addMessageListener(handleMessage);
+  //   return () => {
+  //     removeMessageListener(handleMessage);
+  //   };
+  // }, [addMessageListener, removeMessageListener, router]);
 
   return (
       <Center minH="100vh">
