@@ -3,7 +3,7 @@
 import { createContext, useContext, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    KnownMessages,
+    ReceivedMessages,
     ServerMessage,
     WebSocketHandler,
     webSocketHandlerMap
@@ -39,7 +39,7 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
 
         ws.onmessage = (event) => {
             try {
-            const message: KnownMessages = JSON.parse(event.data);
+            const message: ReceivedMessages = JSON.parse(event.data);
             if (!message || !message.type || !message.subType) {
                 console.error('Invalid message format:', event.data);
                 return;

@@ -1,4 +1,5 @@
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import {GameState} from "@/app/game/models";
 
 export type ServerMessage = {
     type: string;
@@ -20,7 +21,12 @@ export type GetGameStateMessage = GameServerMessage & {
     gameId: string;
 };
 
-export type KnownMessages = JoinGameMessage | GetGameStateMessage;
+export type GameStateMessage = GameServerMessage & {
+    game: GameState
+
+}
+
+export type ReceivedMessages = JoinGameMessage | GameStateMessage;
 
 export type HandlerContext = {
     router: AppRouterInstance;
@@ -35,7 +41,7 @@ export type WebSocketHandler<T extends ServerMessage = ServerMessage> = (
 
 export type WebSocketHandlerMap = {
     "GameMessage:JoinGame": WebSocketHandler<JoinGameMessage>;
-    "GameMessage:GetGame": WebSocketHandler<GetGameStateMessage>;
+    "GameMessage:GameState": WebSocketHandler<GameStateMessage>;
 };
 
 export const webSocketHandlerMap: WebSocketHandlerMap = {
@@ -46,7 +52,7 @@ export const webSocketHandlerMap: WebSocketHandlerMap = {
         router.push("/game/" + message.gameId);
     },
 
-    "GameMessage:GetGame": (message: GetGameStateMessage, context: HandlerContext) => {
-        console.log("Get game state for gameId:", message.gameId);
+    "GameMessage:GameState": (message: GameStateMessage, context: HandlerContext) => {
+        console.log("GameStateMessage received:", message);
     }
 };

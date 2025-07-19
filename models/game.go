@@ -16,6 +16,9 @@ func InitGame(gameId uuid.UUID) *Game {
 	g := Game{}
 	g.Id = gameId
 	g.Deck = InitDeck()
+	g.Discard = make([]Card, 0)
+	g.Rounds = make([]Round, 0)
+	g.Rounds = append(g.Rounds, Round{Turn: 1, IsGandalf: true})
 	g.Players = make(map[uuid.UUID]*Player)
 	return &g
 }

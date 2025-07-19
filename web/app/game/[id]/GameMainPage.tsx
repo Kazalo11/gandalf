@@ -4,7 +4,7 @@ import Deck from "@/components/deck/Deck";
 import MyHand from "@/components/card/MyHand";
 import {useWebSocket} from "@/app/game/websocket/WebSocketProvider";
 import {GetGameStateMessage} from "@/app/game/websocket/webSocketHandler";
-import {useEffect, useRef} from "react";
+import {useEffect} from "react";
 
 export type GameMainPageProps = {
     gameId: string;

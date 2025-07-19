@@ -1,8 +1,8 @@
 package models
 
 type Round struct {
-	Turn      int
-	IsGandalf bool
+	Turn      int  `json:"turn"`
+	IsGandalf bool `json:"isGandalf"`
 }
 
 func (r *Round) NextTurn() {
