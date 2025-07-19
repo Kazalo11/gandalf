@@ -5,16 +5,8 @@ import (
 	"github.com/google/uuid"
 )
 
-type GameMessageSubType int
-
-const (
-	JoinGameMessage GameMessageSubType = iota
-	GetGameMessage
-)
-
 type GameBaseMessage struct {
 	BaseMessage
-	SubType GameMessageSubType `json:"subtype"`
 }
 
 type JoinGame struct {
@@ -23,11 +15,18 @@ type JoinGame struct {
 	GameId   uuid.UUID `json:"gameId"`
 }
 
-func parseGameMessage(message []byte) (GameBaseMessage, error) {
+func parseGameMessage(message []byte) (Message, error) {
 	var m GameBaseMessage
 	err := json.Unmarshal(message, &m)
 	if err != nil {
-		return GameBaseMessage{}, err
+		return &m, err
 	}
-	return m, nil
+	if m.MessageSubType == JoinGameMessage {
+		var join JoinGame
+		if err := json.Unmarshal(message, &join); err != nil {
+			return &m, err
+		}
+		return &join, nil
+	}
+	return &m, nil
 }

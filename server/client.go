@@ -132,10 +132,10 @@ func connectToHub(hub *Hub, p *models.Player, w http.ResponseWriter, r *http.Req
 	joinGameMessage := messages.JoinGame{
 		GameBaseMessage: messages.GameBaseMessage{
 			BaseMessage: messages.BaseMessage{
-				MessageType: messages.GameMessageType,
-				Id:          hub.game.Id,
+				MessageType:    messages.GameMessageType,
+				Id:             hub.game.Id,
+				MessageSubType: messages.JoinGameMessage,
 			},
-			SubType: messages.JoinGameMessage,
 		},
 		PlayerId: p.Id,
 		GameId:   hub.game.Id,
