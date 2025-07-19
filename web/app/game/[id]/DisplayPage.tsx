@@ -1,6 +1,7 @@
 import {GameState, Player, PlayingCard} from "@/app/game/models";
 import {Box, BoxProps} from "@chakra-ui/react";
 import Deck from "@/components/deck/Deck";
+import MyHand from "@/components/card/MyHand";
 
 export type DisplayPageProps = {
     game: GameState
@@ -22,6 +23,7 @@ export default function DisplayPage({game, currentPlayer}: DisplayPageProps) {
     return (
         <Box {...boxStyles}>
             <Deck deck={game.deck} />
+            <MyHand hand={currentPlayer.Hand} name={currentPlayer.Name} />
         </Box>
     )
 }
