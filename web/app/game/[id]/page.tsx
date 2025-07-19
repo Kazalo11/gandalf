@@ -3,6 +3,8 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import {Player} from "@/app/game/models";
+import PlayingCardImg from "@/components/PlayingCardImg";
+import {HStack} from "@chakra-ui/react";
 
 
 export default function GamePage({
@@ -71,7 +73,16 @@ export default function GamePage({
             <p>Player Name: {playerData?.Name}</p>
             <p>
                 Player Hand:{" "}
-                {playerData?.Hand.map((card) => `Suit: ${card.Suit}, Rank: ${card.Rank}`).join(", ")}
+                <HStack>
+                    {
+                        playerData?.Hand.map((card, key) => {
+                            return (
+                                <PlayingCardImg key={key} card={card} isHidden={true}/>
+                            )
+                        })
+                    }
+                </HStack>
+
             </p>
             <p>WebSocket connection will be established here.</p>
         </div>

@@ -1,10 +1,10 @@
 export type Player = {
     Id: string;
     Name: string;
-    Hand: Card[];
+    Hand: PlayingCard[];
 }
 
-type Card = {
+export type PlayingCard = {
     Suit: number
     Rank: number
 }
