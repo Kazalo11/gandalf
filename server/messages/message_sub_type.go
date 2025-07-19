@@ -10,17 +10,20 @@ type MessageSubType int
 const (
 	JoinGameMessage MessageSubType = iota
 	GetGameStateMessage
+	GameStateMessage
 )
 
 var (
 	messageSubTypeToString = map[MessageSubType]string{
 		JoinGameMessage:     "JoinGame",
 		GetGameStateMessage: "GetGame",
+		GameStateMessage:    "GameState",
 	}
 
 	stringToMessageSubType = map[string]MessageSubType{
-		"JoinGame": JoinGameMessage,
-		"GetGame":  GetGameStateMessage,
+		"JoinGame":  JoinGameMessage,
+		"GetGame":   GetGameStateMessage,
+		"GameState": GameStateMessage,
 	}
 )
 

@@ -2,6 +2,7 @@ package messages
 
 import (
 	"encoding/json"
+	"github.com/Kazalo11/gandalf/models"
 	"github.com/google/uuid"
 )
 
@@ -18,6 +19,11 @@ type JoinGame struct {
 type GetGameState struct {
 	GameBaseMessage
 	GameId uuid.UUID `json:"gameId"`
+}
+
+type GameState struct {
+	GameBaseMessage
+	Game models.Game `json:"game"`
 }
 
 func parseGameMessage(message []byte) (Message, error) {
@@ -39,6 +45,14 @@ func parseGameMessage(message []byte) (Message, error) {
 			return &m, err
 		}
 		return &join, nil
+	case GameStateMessage:
+		var state GameState
+		if err := json.Unmarshal(message, &state); err != nil {
+			return &m, err
+		}
+		return &state, nil
+	default:
+		panic("unhandled default case")
 	}
 	return &m, nil
 }
