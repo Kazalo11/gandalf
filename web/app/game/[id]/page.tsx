@@ -65,17 +65,17 @@ export default function GamePage({
         );
     }
 
-    return (
+    return playerData ? (
         <div>
             <h1>Game Page</h1>
             <p>Game ID: {id}</p>
-            <p>Player ID: {playerData?.Id}</p>
-            <p>Player Name: {playerData?.Name}</p>
+            <p>Player ID: {playerData.Id}</p>
+            <p>Player Name: {playerData.Name}</p>
             <p>
                 Player Hand:{" "}
                 <HStack>
                     {
-                        playerData?.Hand.map((card, key) => {
+                        playerData.Hand.map((card, key) => {
                             return (
                                 <PlayingCardImg key={key} card={card} isHidden={true}/>
                             )
@@ -85,6 +85,14 @@ export default function GamePage({
 
             </p>
             <p>WebSocket connection will be established here.</p>
+        </div>
+    ): (
+        <div>
+            <h1>Error</h1>
+            <p>No player data found for this game.</p>
+            <p>
+                Go back to <Link href="/">Home</Link>.
+            </p>
         </div>
     );
 }
