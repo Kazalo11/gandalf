@@ -1,7 +1,5 @@
 import {Player} from "@/app/game/models";
-import {Box, BoxProps, Heading, VStack} from "@chakra-ui/react";
-import Deck from "@/components/deck/Deck";
-import MyHand from "@/components/card/MyHand";
+import {Box, Heading, VStack} from "@chakra-ui/react";
 import {useWebSocket} from "@/app/game/websocket/WebSocketProvider";
 import {GetGameStateMessage} from "@/app/game/websocket/webSocketHandler";
 import {useEffect} from "react";

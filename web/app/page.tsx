@@ -1,8 +1,7 @@
 'use client';
 
 import { Box, Button, Center, Flex, Heading, Input, Stack } from '@chakra-ui/react';
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useCallback } from 'react';
 import {useWebSocket} from "@/app/game/websocket/WebSocketProvider";
 
 
@@ -10,8 +9,7 @@ import {useWebSocket} from "@/app/game/websocket/WebSocketProvider";
 export default function Home() {
   const [gameId, setGameId] = useState('');
   const [playerName, setPlayerName] = useState('');
-  const router = useRouter();
-  const { createGame, joinGame, addMessageListener, removeMessageListener } = useWebSocket();
+  const { createGame, joinGame } = useWebSocket();
 
   const handleCreateGame = useCallback(() => {
     if (!playerName) {
@@ -28,20 +26,6 @@ export default function Home() {
     }
     joinGame(gameId, playerName);
   }, [gameId, playerName, joinGame]);
-
-  // useEffect(() => {
-  //   const handleMessage = (data: any) => {
-  //     if (data?.gameId && data?.playerId) {
-  //       sessionStorage.setItem('playerId', data.playerId);
-  //       router.push('/game/' + data.gameId);
-  //     }
-  //   };
-  //
-  //   addMessageListener(handleMessage);
-  //   return () => {
-  //     removeMessageListener(handleMessage);
-  //   };
-  // }, [addMessageListener, removeMessageListener, router]);
 
   return (
       <Center minH="100vh">
