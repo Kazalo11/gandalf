@@ -2,9 +2,9 @@ package server
 
 import (
 	"fmt"
+	"github.com/Kazalo11/gandalf/models"
 	"github.com/Kazalo11/gandalf/server/messages"
 
-	"github.com/Kazalo11/gandalf/internals"
 	"github.com/google/uuid"
 )
 
@@ -17,7 +17,7 @@ type Hub struct {
 
 	unregister chan *Client
 
-	game      *internals.Game
+	game      *models.Game
 	playerMap map[uuid.UUID]*Client
 }
 
@@ -25,7 +25,7 @@ var (
 	hubMap = make(map[uuid.UUID]*Hub)
 )
 
-func newHub(g *internals.Game) *Hub {
+func newHub(g *models.Game) *Hub {
 	return &Hub{
 		broadcast:  make(chan []byte),
 		register:   make(chan *Client),

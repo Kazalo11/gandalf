@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Kazalo11/gandalf/internals"
 	"github.com/Kazalo11/gandalf/models"
 	"github.com/google/uuid"
 )
@@ -51,7 +50,7 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 
 func CreateGame(w http.ResponseWriter, r *http.Request) {
 	gameId := uuid.New()
-	game := internals.InitGame(gameId)
+	game := models.InitGame(gameId)
 	log.Printf("Created game with id: %s", gameId)
 
 	name := r.URL.Query().Get("name")
@@ -75,7 +74,7 @@ func CreateGame(w http.ResponseWriter, r *http.Request) {
 	go hub.run()
 }
 
-func createPlayer(game *internals.Game, playerId uuid.UUID, name string) *models.Player {
+func createPlayer(game *models.Game, playerId uuid.UUID, name string) *models.Player {
 	var hand []models.Card
 	for i := 0; i < 4; i++ {
 		card, err := game.Deck.DrawFromDeck()
