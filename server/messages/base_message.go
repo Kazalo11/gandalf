@@ -3,6 +3,8 @@ package messages
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+
 	"github.com/google/uuid"
 )
 
@@ -13,24 +15,49 @@ const (
 	GameMessageType
 )
 
+var (
+	messageTypeToString = map[MessageType]string{
+		PlayerMessageType: "PlayerMessage",
+		GameMessageType:   "GameBaseMessage",
+	}
+	stringToMessageType = map[string]MessageType{
+		"PlayerMessage":   PlayerMessageType,
+		"GameBaseMessage": GameMessageType,
+	}
+)
+
+func (m *MessageType) MarshalJSON() ([]byte, error) {
+	str, ok := messageTypeToString[*m]
+	if !ok {
+		return nil, fmt.Errorf("invalid MessageType: %d", m)
+	}
+	return json.Marshal(str)
+}
+
+func (m *MessageType) UnmarshalJSON(data []byte) error {
+	var str string
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+	msgType, ok := stringToMessageType[str]
+	if !ok {
+		return fmt.Errorf("unknown message type: %s", str)
+	}
+	*m = msgType
+	return nil
+}
+
 type Message interface {
 	GetType() MessageType
 }
 
 type BaseMessage struct {
-	Id          uuid.UUID `json:"id"`
-	MessageType string    `json:"type"`
+	Id          uuid.UUID   `json:"id"`
+	MessageType MessageType `json:"type"`
 }
 
 func (m *BaseMessage) GetType() MessageType {
-	switch m.MessageType {
-	case "PlayerMessage":
-		return PlayerMessageType
-	case "GameMessage":
-		return GameMessageType
-	default:
-		return -1
-	}
+	return m.MessageType
 }
 
 func ParseMessage(message []byte) (Message, error) {
@@ -40,18 +67,18 @@ func ParseMessage(message []byte) (Message, error) {
 	}
 
 	switch base.MessageType {
-	case "PlayerMessage":
-		playerMessage, err := parsePlayerMessage(message)
+	case PlayerMessageType:
+		msg, err := parsePlayerMessage(message)
 		if err != nil {
 			return nil, err
 		}
-		return &playerMessage, nil
-	case "GameMessage":
-		gameMessage, err := parseGameMessage(message)
+		return &msg, nil
+	case GameMessageType:
+		msg, err := parseGameMessage(message)
 		if err != nil {
 			return nil, err
 		}
-		return &gameMessage, nil
+		return &msg, nil
 	default:
 		return nil, errors.New("unknown message type")
 	}

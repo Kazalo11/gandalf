@@ -129,11 +129,19 @@ func connectToHub(hub *Hub, p *models.Player, w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	response := GameResponse{
-		GameID:   hub.game.Id,
-		PlayerID: p.Id,
+	joinGameMessage := messages.JoinGame{
+		GameBaseMessage: messages.GameBaseMessage{
+			BaseMessage: messages.BaseMessage{
+				MessageType: messages.GameMessageType,
+				Id:          hub.game.Id,
+			},
+			SubType: messages.JoinGameMessage,
+		},
+		PlayerId: p.Id,
+		GameId:   hub.game.Id,
 	}
-	msg, err := json.Marshal(response)
+
+	msg, err := json.Marshal(joinGameMessage)
 	if err == nil {
 		err := conn.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
@@ -142,23 +150,9 @@ func connectToHub(hub *Hub, p *models.Player, w http.ResponseWriter, r *http.Req
 	}
 
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), player: p}
+
 	go func() {
 		client.hub.register <- client
-		msg := fmt.Sprintf("Player %s has joined the game", client.player.Name)
-		joinMessage := messages.GameMessage{
-			BaseMessage: messages.BaseMessage{
-				Id:          client.hub.game.Id,
-				MessageType: "GameMessage",
-			},
-			Data: msg,
-		}
-
-		encoded, err := json.Marshal(joinMessage)
-		if err != nil {
-			fmt.Printf("Failed to marshal join message: %v\n", err)
-			return
-		}
-		client.hub.broadcast <- encoded
 	}()
 	fmt.Println("Registering client in hub")
 
