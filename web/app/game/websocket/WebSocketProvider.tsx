@@ -4,23 +4,21 @@ import { createContext, useContext, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation';
 import {
     ReceivedMessages,
-    ServerMessage,
     WebSocketHandler,
     webSocketHandlerMap
 } from "@/app/game/websocket/webSocketHandler";
+import {GameState} from "@/app/game/models";
 
-type JoinGameResponse = {
-    gameId: string;
-    playerId: string;
-};
+
 
 type WebSocketContextType = {
     createGame: (playerName: string) => void;
     joinGame: (gameId: string, playerName: string) => void;
     sendMessage: (message: string) => void;
     socket: WebSocket | null;
-    addMessageListener: (listener: (msg: any) => void) => void;
-    removeMessageListener: (listener: (msg: any) => void) => void;
+    addMessageListener: (listener: (msg: never) => void) => void;
+    removeMessageListener: (listener: (msg: never) => void) => void;
+    gameState?: GameState
 
 };
 
@@ -29,8 +27,9 @@ const WebSocketContext = createContext<WebSocketContextType | undefined>(undefin
 export const WebSocketProvider = ({ children }: { children: React.ReactNode }) => {
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const socketRef = useRef<WebSocket | null>(null);
-    const listenersRef = useRef<((msg: any) => void)[]>([]);
+    const listenersRef = useRef<((msg: never) => void)[]>([]);
     const router = useRouter();
+    const [gameState, setGameState] = useState<GameState | undefined>(undefined);
 
     const setupSocketHandlers = useCallback((ws: WebSocket) => {
         ws.onopen = () => {
@@ -49,7 +48,7 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
 
             // @ts-expect-error - TypeScript doesn't know about the dynamic keys in webSocketHandlerMap
             const handler: WebSocketHandler = webSocketHandlerMap[key];
-            handler(message, { router, listeners: listenersRef.current });
+            handler(message, { router, listeners: listenersRef.current, setGameState, gameState });
 
             } catch (err) {
                 console.error('Failed to parse WebSocket message', err);
@@ -82,18 +81,18 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
             console.warn('WebSocket not connected');
         }
     }, []);
-    const addMessageListener = useCallback((listener: (msg: any) => void) => {
+    const addMessageListener = useCallback((listener: (msg: never) => void) => {
         listenersRef.current.push(listener);
     }, []);
 
-    const removeMessageListener = useCallback((listener: (msg: any) => void) => {
+    const removeMessageListener = useCallback((listener: (msg: never) => void) => {
         listenersRef.current = listenersRef.current.filter(l => l !== listener);
     }, []);
 
 
 
     return (
-        <WebSocketContext.Provider value={{ createGame, joinGame, sendMessage, socket, addMessageListener, removeMessageListener }}>
+        <WebSocketContext.Provider value={{ createGame, joinGame, sendMessage, socket, addMessageListener, removeMessageListener, gameState }}>
             {children}
         </WebSocketContext.Provider>
     );

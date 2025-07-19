@@ -20,7 +20,7 @@ const boxStyles: BoxProps = {
     display: "flex",
 }
 export default function GameMainPage({gameId, player}: GameMainPageProps) {
-    const {sendMessage} = useWebSocket();
+    const {sendMessage, gameState} = useWebSocket();
 
     useEffect(() => {
         const getGameStateMessage: GetGameStateMessage = {
@@ -35,14 +35,17 @@ export default function GameMainPage({gameId, player}: GameMainPageProps) {
 
     const playerHand = player.Hand;
     return (
+        gameState ? (
+            <VStack>
+                <Heading size={"4xl"}>Gandalf</Heading>
+                <Box {...boxStyles} >
+                    <Deck />
+                    <MyHand hand={playerHand}/>
+                </Box>
+            </VStack>
+            ) : <Box>Loading...</Box>
 
-        <VStack>
-            <Heading size={"4xl"}>Gandalf</Heading>
-            <Box {...boxStyles} >
-                <Deck />
-                <MyHand hand={playerHand}/>
-            </Box>
-        </VStack>
+
     );
 
 }

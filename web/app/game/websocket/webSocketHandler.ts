@@ -30,7 +30,9 @@ export type ReceivedMessages = JoinGameMessage | GameStateMessage;
 
 export type HandlerContext = {
     router: AppRouterInstance;
-    listeners?: ((msg: any) => void)[];
+    setGameState: (gameState: GameState) => void;
+    gameState?: GameState;
+    listeners?: ((msg: never) => void)[];
 };
 
 export type WebSocketHandler<T extends ServerMessage = ServerMessage> = (
@@ -54,5 +56,15 @@ export const webSocketHandlerMap: WebSocketHandlerMap = {
 
     "GameMessage:GameState": (message: GameStateMessage, context: HandlerContext) => {
         console.log("GameStateMessage received:", message);
+        const { setGameState } = context;
+        if (!message.game) {
+            console.error("GameStateMessage is missing game data");
+            return;
+        }
+        if (message.game === context.gameState) {
+            console.log("GameStateMessage is the same as current game state, skipping update");
+            return;
+        }
+        setGameState(message.game)
     }
 };
