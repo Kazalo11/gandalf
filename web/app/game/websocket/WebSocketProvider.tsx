@@ -16,6 +16,7 @@ type WebSocketContextType = {
     joinGame: (gameId: string, playerName: string) => void;
     sendMessage: (message: string) => void;
     socket: WebSocket | null;
+    reconnect: () => void;
     addMessageListener: (listener: (msg: never) => void) => void;
     removeMessageListener: (listener: (msg: never) => void) => void;
     gameState?: GameState
@@ -58,7 +59,7 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
         ws.onclose = () => {
             console.log('WebSocket disconnected');
         };
-    },[router]);
+    },[gameState, router]);
 
     const createGame = useCallback((playerName: string) => {
         const ws = new WebSocket(`ws://localhost:8080/ws/create?name=${encodeURIComponent(playerName)}`);
@@ -75,12 +76,14 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
     }, [setupSocketHandlers]);
 
     const sendMessage = useCallback((message: string) => {
-        if (socketRef.current?.readyState === WebSocket.OPEN) {
+        if ( socketRef && socketRef.current?.readyState === WebSocket.OPEN) {
             socketRef.current.send(message);
         } else {
             console.warn('WebSocket not connected');
         }
     }, []);
+
+
     const addMessageListener = useCallback((listener: (msg: never) => void) => {
         listenersRef.current.push(listener);
     }, []);
@@ -89,10 +92,24 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
         listenersRef.current = listenersRef.current.filter(l => l !== listener);
     }, []);
 
+    const reconnect = useCallback(() => {
+        const playerId = localStorage.getItem('playerId');
+        const gameId = localStorage.getItem('gameId');
+        if (!playerId || !gameId) {
+            console.warn('Missing playerName or gameId for reconnection');
+            return;
+        }
+
+        const ws = new WebSocket(`ws://localhost:8080/ws/game/${encodeURIComponent(gameId)}/reconnect?name=${encodeURIComponent(playerId)}`);
+        setupSocketHandlers(ws);
+        socketRef.current = ws;
+        setSocket(ws);
+    }, [ setupSocketHandlers]);
+
 
 
     return (
-        <WebSocketContext.Provider value={{ createGame, joinGame, sendMessage, socket, addMessageListener, removeMessageListener, gameState }}>
+        <WebSocketContext.Provider value={{ createGame, joinGame, sendMessage, socket, reconnect, addMessageListener, removeMessageListener, gameState }}>
             {children}
         </WebSocketContext.Provider>
     );

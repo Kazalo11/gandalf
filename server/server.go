@@ -18,6 +18,7 @@ func Start() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws/create", CreateGame)
 	mux.HandleFunc("/ws/game/{id}/join", JoinGame)
+	mux.HandleFunc("/ws/game/{id}/reconnect", ReconnectGame)
 	mux.HandleFunc("/game/{id}/player/{playerId}", GetPlayer)
 
 	handler := cors.New(cors.Options{

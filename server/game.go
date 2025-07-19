@@ -44,6 +44,7 @@ func JoinGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("Created player: %+v", p)
+	game.AddPlayer(*p)
 
 	connectToHub(hub, p, w, r)
 }
@@ -74,15 +75,42 @@ func CreateGame(w http.ResponseWriter, r *http.Request) {
 	go hub.run()
 }
 
-func createPlayer(game *models.Game, playerId uuid.UUID, name string) *models.Player {
-	var hand []models.Card
-	for i := 0; i < 4; i++ {
-		card, err := game.Deck.DrawFromDeck()
-		if err != nil {
-			log.Printf("Not able to draw from deck: %v", err)
-			return nil
-		}
-		hand = append(hand, card)
+func ReconnectGame(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	hubId, err := uuid.Parse(id)
+	if err != nil {
+		http.Error(w, "Invalid game ID", http.StatusBadRequest)
+		log.Printf("Error converting id to uuid: %v", err)
+		return
 	}
-	return models.NewPlayer(playerId, name, hand)
+
+	hub, exists := hubMap[hubId]
+	if !exists {
+		http.Error(w, "Game not found", http.StatusBadRequest)
+		log.Printf("Game not found for id: %s", hubId)
+		return
+	}
+
+	playerId := r.URL.Query().Get("playerId")
+	if playerId == "" {
+		http.Error(w, "Player ID is required", http.StatusBadRequest)
+		log.Println("Player ID is required")
+		return
+	}
+
+	playerUUID, err := uuid.Parse(playerId)
+	if err != nil {
+		http.Error(w, "Invalid player ID", http.StatusBadRequest)
+		log.Printf("Error converting playerId to uuid: %v", err)
+		return
+	}
+
+	player, exists := hub.game.Players[playerUUID]
+	if !exists {
+		http.Error(w, "Player not found", http.StatusNotFound)
+		log.Printf("Player not found for id: %s", playerId)
+		return
+	}
+
+	connectToHub(hub, player, w, r)
 }

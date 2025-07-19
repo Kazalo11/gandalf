@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"github.com/Kazalo11/gandalf/models"
 	"github.com/google/uuid"
 	"log"
 	"net/http"
@@ -52,4 +53,17 @@ func GetPlayer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to write response", http.StatusInternalServerError)
 		return
 	}
+}
+
+func createPlayer(game *models.Game, playerId uuid.UUID, name string) *models.Player {
+	var hand []models.Card
+	for i := 0; i < 4; i++ {
+		card, err := game.Deck.DrawFromDeck()
+		if err != nil {
+			log.Printf("Not able to draw from deck: %v", err)
+			return nil
+		}
+		hand = append(hand, card)
+	}
+	return models.NewPlayer(playerId, name, hand)
 }

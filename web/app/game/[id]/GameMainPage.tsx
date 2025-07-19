@@ -20,7 +20,13 @@ const boxStyles: BoxProps = {
     display: "flex",
 }
 export default function GameMainPage({gameId, player}: GameMainPageProps) {
-    const {sendMessage, gameState} = useWebSocket();
+    const {sendMessage, gameState, socket, reconnect} = useWebSocket();
+    useEffect(() => {
+        if (!socket) {
+            reconnect();
+        }
+    }, [socket, reconnect]);
+
 
     useEffect(() => {
         const getGameStateMessage: GetGameStateMessage = {
