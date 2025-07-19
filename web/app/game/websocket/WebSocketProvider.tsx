@@ -100,7 +100,7 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
             return;
         }
 
-        const ws = new WebSocket(`ws://localhost:8080/ws/game/${encodeURIComponent(gameId)}/reconnect?name=${encodeURIComponent(playerId)}`);
+        const ws = new WebSocket(`ws://localhost:8080/ws/game/${encodeURIComponent(gameId)}/reconnect?playerId=${encodeURIComponent(playerId)}`);
         setupSocketHandlers(ws);
         socketRef.current = ws;
         setSocket(ws);

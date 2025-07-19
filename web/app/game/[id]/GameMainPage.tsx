@@ -40,7 +40,6 @@ export default function GameMainPage({gameId, player}: GameMainPageProps) {
         sendMessage(JSON.stringify(getGameStateMessage));
     }, [gameId, sendMessage]);
 
-    const playerHand = player.Hand;
     return (
         gameState ? (
             <VStack>
